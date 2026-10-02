@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guess the Number</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="intro" id="intro">
+  <div class="nums" id="nums" aria-hidden="true"></div>
+  <div class="introBox">
+    <div class="q" aria-hidden="true">?</div>
+    <h2>Guess the number</h2>
+    <p>A secret number is hiding. Can you corner it before you run out of tries?</p>
+    <button class="go" id="start">Let's play</button>
+  </div>
+</div>
+<main>
+  <h1>Guess the number</h1>
+  <p class="sub">Pick a level, then corner the secret number.</p>
+  <div class="levels" id="levels"></div>
+  <section class="panel">
+    <div class="big" id="big">?</div>
+    <div class="cheer" id="cheer" role="dialog" aria-modal="true" aria-labelledby="cheerTitle">
+  <div class="cheerCard" id="cheerCard" tabindex="-1">
+    <div class="num" id="cheerNum"></div>
+    <strong id="cheerTitle"></strong>
+    <span id="cheerSub"></span>
+    <div class="row"><button class="go" id="cheerAgain">Play again</button><button class="alt" id="cheerClose">Close</button></div>
+  </div>
+</div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+    <div class="range"><i id="bar"></i></div>
+    <div class="ends"><span id="lo"></span><span id="hi"></span></div>
+    <div class="row">
+      <input id="guess" type="number" inputmode="numeric" placeholder="Your guess" aria-label="Your guess">
+      <button class="go" id="go">Guess</button>
+    </div>
+    <div class="stats"><span>Attempts <b id="used">0</b> / <b id="max">0</b></span><span>Best range left: <b id="left"></b></span></div>
+    <div class="hist" id="hist"></div>
+    <button class="again" id="again">Play again</button>
+  </section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
