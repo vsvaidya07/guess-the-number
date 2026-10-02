@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guess the Number</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#f6f3ff;--card:#fff;--ink:#1d1740;--mute:#6b6590;--accent:#e6307a;--good:#0f9e75;--track:#e4def9;--warn:#c27a00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14122b;--card:#211e47;--ink:#f3f0ff;--mute:#a7a1d1;--accent:#ff5fa2;--good:#5eeac0;--track:#332f66;--warn:#ffc857}}
+:root[data-theme="dark"]{--bg:#14122b;--card:#211e47;--ink:#f3f0ff;--mute:#a7a1d1;--accent:#ff5fa2;--good:#5eeac0;--track:#332f66;--warn:#ffc857}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:20px 16px}
+main{width:100%;max-width:460px}
+h1{font-size:2rem;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:var(--mute);margin:0 0 18px}
+.levels{display:flex;gap:8px;margin-bottom:16px}
+.levels button{flex:1;padding:10px 6px;border-radius:12px;border:2px solid var(--track);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.levels button small{display:block;font-weight:500;color:var(--mute);font-size:.75rem}
+.levels button[aria-pressed="true"]{border-color:var(--accent)}
+.panel{background:var(--card);border-radius:20px;padding:20px}
+.big{font-size:5.5rem;font-weight:800;line-height:1;text-align:center;margin:6px 0 2px;color:var(--accent)}
+.msg{text-align:center;min-height:2.6em;font-weight:700;font-size:1.1rem;margin:0 0 14px}
+.msg.win{color:var(--good);font-size:1.25rem}.msg.lose{color:var(--warn)}
+.range{position:relative;height:14px;border-radius:7px;background:var(--track);margin:6px 0 4px;overflow:hidden}
+.range i{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:7px;transition:left .3s,width .3s}
+.ends{display:flex;justify-content:space-between;color:var(--mute);font-size:.85rem;margin-bottom:16px}
+.row{display:flex;gap:8px}
+input{flex:1;min-width:0;font:inherit;font-size:1.2rem;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--track);background:var(--bg);color:var(--ink)}
+.go{padding:12px 20px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+:where(button,input):focus-visible{outline:3px solid var(--good);outline-offset:2px}
+button:disabled,input:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:flex;justify-content:space-between;margin:16px 0 8px;color:var(--mute);font-weight:500}
+.stats b{color:var(--ink)}
+.hist{display:flex;flex-wrap:wrap;gap:6px;min-height:34px}
+.chip{padding:5px 10px;border-radius:999px;background:var(--track);font-weight:700;font-size:.9rem}
+.chip.hi{color:var(--warn)}.chip.lo{color:var(--accent)}.chip.ok{background:var(--good);color:var(--bg)}
+.again{display:none;width:100%;margin-top:14px;padding:12px;border:2px solid var(--accent);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:800;cursor:pointer}
+.again.show{display:block}
+.cheer{display:none;position:fixed;inset:0;z-index:15;align-items:center;justify-content:center;padding:24px;background:rgba(20,18,43,.65)}
+.cheer.show{display:flex}
+.cheerCard:focus{outline:none}
+.cheerCard{width:100%;max-width:380px;text-align:center;background:var(--card);border:3px solid var(--good);border-radius:24px;padding:28px 22px;animation:pop .4s ease-out}
+.cheerCard .num{font-size:4.5rem;font-weight:800;line-height:1;color:var(--accent)}
+.cheerCard strong{display:block;font-size:1.7rem;font-weight:800;color:var(--good);margin:8px 0}
+.cheerCard span{display:block;margin-bottom:20px}
+.cheerCard .row{justify-content:center}
+.cheerCard .alt{padding:12px 20px;border:2px solid var(--track);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.bit{position:fixed;top:-20px;font-size:1.4rem;pointer-events:none;animation:fall 2.2s ease-in forwards;z-index:30}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.9}}
+@media (prefers-reduced-motion:reduce){.range i{transition:none}.cheerCard{animation:none}.bit{display:none}}
+.intro{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));overflow:hidden;transition:opacity .5s}
+.intro.out{opacity:0;pointer-events:none}
+.nums span{position:absolute;bottom:-60px;font-weight:800;color:var(--track);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-120vh) rotate(25deg)}}
+.introBox{position:relative;text-align:center;max-width:380px}
+.introBox .q{font-size:8rem;font-weight:800;line-height:1;color:var(--accent);animation:bounce 1.4s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.06)}}
+.introBox h2{font-size:2.2rem;font-weight:800;margin:6px 0 8px;letter-spacing:-.02em;animation:rise2 .7s .2s both}
+.introBox p{color:var(--mute);margin:0 0 22px;animation:rise2 .7s .45s both}
+.introBox .go{font-size:1.1rem;padding:14px 32px;animation:rise2 .7s .7s both}
+@keyframes rise2{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.nums{display:none}.introBox .q,.introBox h2,.introBox p,.introBox .go{animation:none}.intro{transition:none}}
+</style>
+</head>
+<body>
+<div class="intro" id="intro">
+  <div class="nums" id="nums" aria-hidden="true"></div>
+  <div class="introBox">
+    <div class="q" aria-hidden="true">?</div>
+    <h2>Guess the number</h2>
+    <p>A secret number is hiding. Can you corner it before you run out of tries?</p>
+    <button class="go" id="start">Let's play</button>
+  </div>
+</div>
+<main>
+  <h1>Guess the number</h1>
+  <p class="sub">Pick a level, then corner the secret number.</p>
+  <div class="levels" id="levels"></div>
+  <section class="panel">
+    <div class="big" id="big">?</div>
+    <div class="cheer" id="cheer" role="dialog" aria-modal="true" aria-labelledby="cheerTitle">
+  <div class="cheerCard" id="cheerCard" tabindex="-1">
+    <div class="num" id="cheerNum"></div>
+    <strong id="cheerTitle"></strong>
+    <span id="cheerSub"></span>
+    <div class="row"><button class="go" id="cheerAgain">Play again</button><button class="alt" id="cheerClose">Close</button></div>
+  </div>
+</div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+    <div class="range"><i id="bar"></i></div>
+    <div class="ends"><span id="lo"></span><span id="hi"></span></div>
+    <div class="row">
+      <input id="guess" type="number" inputmode="numeric" placeholder="Your guess" aria-label="Your guess">
+      <button class="go" id="go">Guess</button>
+    </div>
+    <div class="stats"><span>Attempts <b id="used">0</b> / <b id="max">0</b></span><span>Best range left: <b id="left"></b></span></div>
+    <div class="hist" id="hist"></div>
+    <button class="again" id="again">Play again</button>
+  </section>
+</main>
+<script>
+// Difficulty settings: range and attempt limit
+const LEVELS = {
+  easy:   { label: "Easy",   min: 1, max: 50,  tries: 10 },
+  medium: { label: "Medium", min: 1, max: 100, tries: 7 },
+  hard:   { label: "Hard",   min: 1, max: 500, tries: 9 }
+};
+
+let shownAt = 0, introDone = false, level = "medium", secret, attempts, low, high, over, guesses;
+const $ = id => document.getElementById(id);
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function buildLevelButtons() {
+  $("levels").innerHTML = "";
+  for (const key in LEVELS) {               // loop over difficulty levels
+    const L = LEVELS[key];
+    const b = document.createElement("button");
+    b.innerHTML = L.label + "<small>" + L.min + "–" + L.max + " · " + L.tries + " tries</small>";
+    b.setAttribute("aria-pressed", key === level);
+    b.onclick = () => { level = key; buildLevelButtons(); startGame(); };
+    $("levels").appendChild(b);
+  }
+}
+
+function startGame() {
+  const L = LEVELS[level];
+  secret = randomInt(L.min, L.max);
+  attempts = 0; low = L.min; high = L.max; over = false; guesses = [];
+  $("big").textContent = "?";
+  setMsg("Type a number between " + L.min + " and " + L.max + ".", "");
+  $("guess").value = ""; $("guess").disabled = false; $("go").disabled = false;
+  $("again").classList.remove("show");
+  $("cheer").classList.remove("show");
+  render();
+  if (introDone) $("guess").focus();
+}
+
+function setMsg(text, cls) {
+  $("msg").textContent = text;
+  $("msg").className = "msg " + cls;
+}
+
+function render() {
+  const L = LEVELS[level], span = L.max - L.min + 1;
+  $("bar").style.left = ((low - L.min) / span * 100) + "%";
+  $("bar").style.width = ((high - low + 1) / span * 100) + "%";
+  $("lo").textContent = L.min; $("hi").textContent = L.max;
+  $("used").textContent = attempts; $("max").textContent = L.tries;
+  $("left").textContent = low + "–" + high;
+  $("hist").innerHTML = "";
+  for (const g of guesses) {                // loop over past guesses
+    const c = document.createElement("span");
+    c.className = "chip " + (g.n === secret ? "ok" : g.n > secret ? "hi" : "lo");
+    c.textContent = g.n + (g.n === secret ? " ✓" : g.n > secret ? " ↓" : " ↑");
+    $("hist").appendChild(c);
+  }
+}
+
+function congratulate() {
+  const L = LEVELS[level];
+  const best = Math.ceil(Math.log2(L.max - L.min + 1));   // perfect-play minimum
+  let title, sub;
+  if (attempts === 1) { title = "First try?! Are you psychic? 🔮"; sub = "That is legendary luck."; }
+  else if (attempts <= best) { title = "Binary search master! 🧠"; sub = "You solved it in " + attempts + " tries, as fast as perfect play allows."; }
+  else if (attempts < L.tries) { title = "Nailed it! 🎉"; sub = "Cracked the " + L.label + " level in " + attempts + " tries."; }
+  else { title = "Clutch win on the last try! 😮‍💨"; sub = "Closest finish possible, and you still got it."; }
+  setMsg(title + " " + sub, "win");              // also show the words in the main panel
+  window.scrollTo(0, 0);
+  $("cheerNum").textContent = secret;
+  $("cheerTitle").textContent = title;
+  $("cheerSub").textContent = sub;
+  $("cheer").classList.add("show");
+  shownAt = Date.now();
+  $("cheerCard").focus({ preventScroll: true });   // focus the card, not a button, so a held Enter key cannot dismiss it
+  confetti();
+}
+
+function confetti() {
+  const bits = ["🎉","✨","🎊","⭐","💖"];
+  for (let i = 0; i < 28; i++) {                         // loop to spawn confetti
+    const el = document.createElement("span");
+    el.className = "bit";
+    el.textContent = bits[i % bits.length];
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.animationDelay = Math.random() * 0.6 + "s";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+}
+
+function endGame() {
+  over = true;
+  $("guess").disabled = true; $("go").disabled = true;
+  $("again").classList.add("show");
+}
+
+function checkGuess() {
+  if (over) return;
+  const L = LEVELS[level];
+  const n = parseInt($("guess").value, 10);
+
+  if (isNaN(n) || n < L.min || n > L.max) {
+    setMsg("Enter a whole number from " + L.min + " to " + L.max + ".", "");
+    return;
+  }
+  if (guesses.some(g => g.n === n)) {
+    setMsg("You already tried " + n + ". Pick a new one.", "");
+    return;
+  }
+
+  attempts++;
+  guesses.push({ n });
+  $("guess").value = "";
+
+  if (n === secret) {
+    $("big").textContent = secret;
+    setMsg("Got it! " + secret + " in " + attempts + (attempts === 1 ? " try." : " tries."), "win");
+    render(); congratulate(); endGame();
+  } else if (attempts >= L.tries) {
+    $("big").textContent = secret;
+    setMsg("Out of tries. The number was " + secret + ".", "lose");
+    render(); endGame();
+  } else {
+    if (n > secret) { high = Math.min(high, n - 1); setMsg(n + " is too high. Go lower.", ""); }
+    else            { low  = Math.max(low,  n + 1); setMsg(n + " is too low. Go higher.", ""); }
+    render();
+    $("guess").focus();
+  }
+}
+
+$("go").onclick = checkGuess;
+$("guess").addEventListener("keydown", e => { if (e.key === "Enter" && !e.repeat) checkGuess(); });
+$("again").onclick = startGame;
+$("cheerAgain").onclick = () => { if (Date.now() - shownAt > 800) startGame(); };
+$("cheerClose").onclick = () => { $("cheer").classList.remove("show"); $("again").focus(); };
+
+function playIntro() {
+  for (let i = 0; i < 26; i++) {                         // loop to spawn floating numbers
+    const n = document.createElement("span");
+    n.textContent = randomInt(1, 100);
+    n.style.left = Math.random() * 100 + "%";
+    n.style.fontSize = (1.2 + Math.random() * 2.6) + "rem";
+    n.style.animationDuration = (6 + Math.random() * 6) + "s";
+    n.style.animationDelay = (-Math.random() * 8) + "s";
+    $("nums").appendChild(n);
+  }
+  $("start").focus();
+}
+
+$("start").onclick = () => {
+  introDone = true;
+  $("intro").classList.add("out");
+  setTimeout(() => $("intro").remove(), 600);
+  $("guess").focus();
+};
+
+buildLevelButtons();
+startGame();
+playIntro();
+</script>
+</body>
+</html>
